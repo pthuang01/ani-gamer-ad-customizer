@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         巴哈動畫瘋廣告自訂助手
 // @namespace    https://github.com/pthuang01/ani-gamer-ad-customizer
-// @version      1.8
+// @version      1.9
 // @description  限制為巴哈自帶廣告 (跳過Google Ads)，25秒結束廣告、手動/自動結束廣告、正常/靜音播放廣告，及一個隱藏的實驗性功能
 // @author       DoReMi
 // @match        https://ani.gamer.com.tw/animeVideo.php?sn=*
@@ -199,25 +199,91 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         `;
 
+        // 🌟 隱藏抽屜解鎖懸停秒數（修改此處數字，箭頭、分隔線、點擊有效觸發三者將完全自動連動）
+        const UNLOCK_HOVER_SECONDS = 1.5;
+
         const currentPlayMode = CONFIG.playMode;
         const currentSkipMode = CONFIG.skipMode;
+        const isExpanded = currentPlayMode === 'no-download';
 
         modalOverlay.innerHTML = `
-            <div style="
-                background: #1e1f22;
-                color: #f2f3f5;
-                width: 500px;
-                max-width: 92vw;
-                border-radius: 12px;
-                box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-                border: 1px solid #35373c;
-                overflow: hidden;
-                animation: aniModalFadeIn 0.2s ease-out;
-            ">
+            <div class="ani-modal-wrapper" style="position: relative; border-radius: 14px; max-width: 92vw;">
+                <!-- 七彩霓虹流光層 (外光暈) -->
+                <div id="ani-rainbow-glow" class="ani-rainbow-layer ani-rainbow-blur">
+                    <div class="ani-rainbow-spinner"></div>
+                </div>
+
+                <!-- 設定視窗主體 -->
+                <div style="
+                    position: relative;
+                    z-index: 2;
+                    background: #1e1f22;
+                    color: #f2f3f5;
+                    width: 500px;
+                    max-width: 100%;
+                    border-radius: 12px;
+                    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+                    border: 1px solid #35373c;
+                    overflow: hidden;
+                    animation: aniModalFadeIn 0.2s ease-out;
+                ">
                 <style>
                     @keyframes aniModalFadeIn {
                         from { opacity: 0; transform: scale(0.95); }
                         to { opacity: 1; transform: scale(1); }
+                    }
+                    @keyframes aniToastRainbowIn {
+                        0% { opacity: 0; transform: translate(-50%, 15px) scale(0.95); }
+                        100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+                    }
+
+                    /* 圍繞視窗的七彩霓虹流光動畫 (普通流動速度) */
+                    @keyframes aniRainbowSpin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    /* 緩慢浮現 1 秒 ➔ 圍繞流動 2 秒 ➔ 柔和淡出 1 秒消失 (總長 4.0s) */
+                    @keyframes aniRainbowFade {
+                        0% { opacity: 0; }
+                        25% { opacity: 1; }
+                        75% { opacity: 1; }
+                        100% { opacity: 0; }
+                    }
+                    .ani-rainbow-layer {
+                        position: absolute;
+                        pointer-events: none;
+                        opacity: 0;
+                        overflow: hidden;
+                    }
+                    .ani-rainbow-blur {
+                        inset: -6px;
+                        border-radius: 18px;
+                        filter: blur(14px);
+                        z-index: 0;
+                    }
+                    .ani-rainbow-spinner {
+                        position: absolute;
+                        width: 300%;
+                        height: 300%;
+                        top: -100%;
+                        left: -100%;
+                        background: conic-gradient(
+                            from 0deg,
+                            #ff0055 0deg,
+                            #ff7700 45deg,
+                            #ffee00 90deg,
+                            #00ff88 135deg,
+                            #00ffff 180deg,
+                            #0077ff 225deg,
+                            #aa00ff 270deg,
+                            #ff00aa 315deg,
+                            #ff0055 360deg
+                        );
+                        animation: aniRainbowSpin 3.5s linear infinite;
+                        transform-origin: center center;
+                    }
+                    .ani-rainbow-active {
+                        animation: aniRainbowFade 4.0s ease-in-out forwards !important;
                     }
                     .ani-modal-section { margin-bottom: 20px; }
                     .ani-modal-title {
@@ -278,6 +344,108 @@
                     .ani-btn-apply:hover { background: #00a89c; }
                     .ani-btn-save-reload { background: #00d4c5; color: #111214; font-weight: 600; }
                     .ani-btn-save-reload:hover { background: #1affec; }
+
+                    /* 隱藏選項平滑抽屜容器 */
+                    .ani-hidden-container {
+                        max-height: 0;
+                        opacity: 0;
+                        overflow: hidden;
+                        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                                    opacity 0.35s ease,
+                                    margin 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                        margin-bottom: 0;
+                    }
+                    .ani-hidden-container.expanded {
+                        max-height: 110px;
+                        opacity: 1;
+                        margin-bottom: 6px;
+                        overflow: visible;
+                    }
+
+                    /* 讓「完全不下載廣告」選項從左側往右 fade-in 2s 到定點 */
+                    @keyframes aniOptionSlideInLeft {
+                        0% {
+                            opacity: 0;
+                            transform: translateX(-32px);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: translateX(0);
+                        }
+                    }
+                    .ani-hidden-container.unlock-slide .ani-modal-option {
+                        animation: aniOptionSlideInLeft 2.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+
+                    /* 現代感極簡開合分隔線 */
+                    .ani-collapse-divider {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 6px 0 2px 0;
+                        cursor: default;
+                        user-select: none;
+                    }
+                    .ani-collapse-divider .ani-divider-line {
+                        flex: 1;
+                        height: 1px;
+                        position: relative;
+                        background: linear-gradient(90deg, rgba(53, 55, 60, 0.2), #35373c 30%, #35373c 70%, rgba(53, 55, 60, 0.2));
+                    }
+                    .ani-collapse-divider .ani-divider-line::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(90deg, rgba(0, 212, 197, 0.1), #00d4c5 30%, #00d4c5 70%, rgba(0, 212, 197, 0.1));
+                        box-shadow: 0 0 8px rgba(0, 212, 197, 0.5);
+                        opacity: 0;
+                        transition: opacity 0.4s ease 0s;
+                        pointer-events: none;
+                    }
+                    .ani-collapse-divider .ani-divider-icon {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 24px;
+                        height: 20px;
+                        margin: 0 8px;
+                        color: #5a5e67;
+                        cursor: default;
+                        transition: color 0.4s ease 0s, filter 0.4s ease 0s;
+                    }
+                    .ani-collapse-divider .ani-divider-icon svg {
+                        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    /* 閉合狀態：滑鼠懸浮指定秒數後觸發青色霓虹微光特效，分隔線與箭頭嚴格同步延遲 */
+                    .ani-collapse-divider:not(.expanded):hover .ani-divider-line::after {
+                        opacity: 1;
+                        transition: opacity 0.4s ease ${UNLOCK_HOVER_SECONDS}s;
+                    }
+                    .ani-collapse-divider:not(.expanded):hover .ani-divider-icon {
+                        color: #00d4c5;
+                        filter: drop-shadow(0 0 6px rgba(0, 212, 197, 0.7));
+                        transition: color 0.4s ease ${UNLOCK_HOVER_SECONDS}s, filter 0.4s ease ${UNLOCK_HOVER_SECONDS}s;
+                    }
+
+                    /* 展開後狀態：箭頭翻轉 180 度 */
+                    .ani-collapse-divider.expanded .ani-divider-icon svg {
+                        transform: rotate(180deg);
+                    }
+
+                    /* 展開後狀態：Hover 不發生任何特效 */
+                    .ani-collapse-divider.expanded:hover .ani-divider-line::after {
+                        opacity: 0;
+                        transition: none;
+                    }
+                    .ani-collapse-divider.expanded:hover .ani-divider-icon {
+                        color: #5a5e67;
+                        filter: none;
+                        transition: none;
+                    }
                 </style>
 
                 <!-- Header -->
@@ -305,12 +473,25 @@
                                 <span class="ani-modal-desc">廣告期間全程強力靜音 (25 秒)，進入正片時自動恢復聲音</span>
                             </label>
                         </div>
-                        <div class="ani-modal-option" data-radio-id="playMode_no_download">
-                            <input type="radio" id="playMode_no_download" name="ani_play_mode" value="no-download" ${currentPlayMode === 'no-download' ? 'checked' : ''}>
-                            <label for="playMode_no_download">
-                                完全不下載廣告
-                                <span class="ani-modal-desc">阻擋廣告切片下載 (0 MB 流量)，25 秒虛擬計時後直接切入正片</span>
-                            </label>
+                        <!-- 隱藏抽屜：完全不下載廣告 -->
+                        <div id="ani-hidden-container" class="ani-hidden-container ${isExpanded ? 'expanded' : ''}">
+                            <div class="ani-modal-option" data-radio-id="playMode_no_download">
+                                <input type="radio" id="playMode_no_download" name="ani_play_mode" value="no-download" ${currentPlayMode === 'no-download' ? 'checked' : ''}>
+                                <label for="playMode_no_download">
+                                    完全不下載廣告
+                                    <span class="ani-modal-desc">阻擋廣告切片下載 (0 MB 流量)，25 秒虛擬計時後直接切入正片</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- 現代感開合分隔線 -->
+                        <div id="ani-collapse-divider" class="ani-collapse-divider ${isExpanded ? 'expanded' : ''}">
+                            <div class="ani-divider-line"></div>
+                            <div class="ani-divider-icon">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="ani-divider-line"></div>
                         </div>
                     </div>
 
@@ -341,9 +522,68 @@
                     <button class="ani-btn ani-btn-save-reload" id="ani-btn-save-reload">儲存並重整</button>
                 </div>
             </div>
+        </div>
         `;
 
         targetDocument.body.appendChild(modalOverlay);
+
+        // 開合分隔線切換邏輯 (閉合狀態下：在發亮前按它不會展開)
+        const collapseDivider = modalOverlay.querySelector('#ani-collapse-divider');
+        const hiddenContainer = modalOverlay.querySelector('#ani-hidden-container');
+
+        let hoverTimer = null;
+        let isGlowActive = false;
+
+        collapseDivider.addEventListener('mouseenter', () => {
+            if (!collapseDivider.classList.contains('expanded')) {
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(() => {
+                    isGlowActive = true;
+                }, UNLOCK_HOVER_SECONDS * 1000);
+            }
+        });
+
+        collapseDivider.addEventListener('mouseleave', () => {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+            isGlowActive = false;
+        });
+
+        collapseDivider.addEventListener('click', () => {
+            const isCurrentlyExpanded = hiddenContainer.classList.contains('expanded');
+            if (!isCurrentlyExpanded) {
+                // 閉合狀態：在發亮前點擊不會展開
+                if (!isGlowActive) return;
+
+                // 🌟 1. 觸發設定視窗邊框的七彩霓虹流光特效（緩慢浮現 1 秒 ➔ 流動 1 秒 ➔ 淡出 1 秒）
+                const rainbowGlow = modalOverlay.querySelector('#ani-rainbow-glow');
+                if (rainbowGlow) {
+                    rainbowGlow.classList.remove('ani-rainbow-active');
+                    void rainbowGlow.offsetWidth; // 強制重繪
+                    rainbowGlow.classList.add('ani-rainbow-active');
+                }
+
+                // 🌟 2. 發生霓虹特效的同時彈出專屬 Toast (青色主視覺，同步 4 秒)
+                showToast('已解鎖實驗性隱藏功能！', 4000);
+
+                // 🌟 3. 「完全不下載廣告」選項從左側往右 fade-in 2s 到定點展開
+                hiddenContainer.classList.remove('unlock-slide');
+                void hiddenContainer.offsetWidth; // 強制重繪觸發動畫
+                hiddenContainer.classList.add('unlock-slide');
+                hiddenContainer.classList.add('expanded');
+                collapseDivider.classList.add('expanded');
+
+                isGlowActive = false;
+                clearTimeout(hoverTimer);
+            } else {
+                // 展開狀態：可隨時點擊收合
+                hiddenContainer.classList.remove('expanded');
+                hiddenContainer.classList.remove('unlock-slide');
+                collapseDivider.classList.remove('expanded');
+                isGlowActive = false;
+                clearTimeout(hoverTimer);
+            }
+        });
 
         // 點擊選項整列皆可選取
         modalOverlay.querySelectorAll('.ani-modal-option').forEach(opt => {
@@ -384,7 +624,10 @@
         radioMuted.addEventListener('change', updateSkipOptionState);
         updateSkipOptionState();
 
-        const closeModal = () => modalOverlay.remove();
+        const closeModal = () => {
+            clearTimeout(hoverTimer);
+            modalOverlay.remove();
+        };
         targetDocument.getElementById('ani-btn-close').onclick = closeModal;
         modalOverlay.onclick = (e) => { if (e.target === modalOverlay) closeModal(); };
         targetDocument.getElementById('ani-btn-cancel').onclick = closeModal;
@@ -414,7 +657,7 @@
         };
     }
 
-    function showToast(msg) {
+    function showToast(msg, durationMs = 2500) {
         const toast = targetDocument.createElement('div');
         toast.style.cssText = `
             position: fixed;
@@ -423,17 +666,27 @@
             transform: translateX(-50%);
             background: #00d4c5;
             color: #111214;
-            padding: 10px 22px;
+            padding: 11px 24px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             z-index: 1000000;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 18px rgba(0, 212, 197, 0.45);
             pointer-events: none;
+            letter-spacing: 0.5px;
+            animation: aniToastRainbowIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.8s ease, transform 0.8s ease;
         `;
         toast.textContent = msg;
         targetDocument.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2500);
+
+        // 在最後 0.8 秒隨同七彩流光柔和淡出
+        const fadeDelay = Math.max(0, durationMs - 800);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translate(-50%, 8px)';
+            setTimeout(() => toast.remove(), 800);
+        }, fadeDelay);
     }
 
     GM_registerMenuCommand('⚙️ 動畫瘋廣告設定視窗 (Alt + A)', () => {

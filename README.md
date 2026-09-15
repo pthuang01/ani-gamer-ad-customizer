@@ -3,7 +3,7 @@
 # 🎬動畫瘋廣告自訂助手
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#-免責聲明-disclaimer)
-[![Version](https://img.shields.io/badge/Version-1.8-green)](https://github.com/pthuang01/ani-gamer-ad-customizer)
+[![Version](https://img.shields.io/badge/Version-1.9-green)](https://github.com/pthuang01/ani-gamer-ad-customizer)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-安裝-960000)](https://update.greasyfork.org/scripts/595865/%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B.user.js)
 [![Platform](https://img.shields.io/badge/Platform-Tampermonkey%20%7C%20Violentmonkey-orange)](#-安裝教學)
 
@@ -93,7 +93,7 @@
 #### 廣告播放模式
 - **正常播放（預設）**：正常播放官方自帶開頭廣告，倒數 25 秒後即時跳過切入正片
 - **靜音播放**：廣告期間全程自動強制靜音，進入正片時自動恢復聲音
-- **隱藏功能**：進階實驗性功能，可供探索與切換
+- **隱藏功能**：進階實驗性功能，有興趣的話就找找看吧！
 
 #### 廣告跳過設定
 - **倒數結束自動點擊跳過（預設）**：滿 25 秒跳過按鈕亮起時，自動模擬點擊切入正片，完全無須手動操作
