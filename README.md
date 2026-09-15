@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#-免責聲明-disclaimer)
 [![Version](https://img.shields.io/badge/Version-1.8-green.svg)](https://github.com/pthuang01/ani-gamer-ad-customizer)
+[![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-安裝-960000)]()
 [![Platform](https://img.shields.io/badge/Platform-Tampermonkey%20%7C%20Violentmonkey-orange.svg)](#-安裝教學)
 
 限制為巴哈自帶廣告並跳過 Google Ads，25 秒準時結束直接切入正片！<br />
@@ -58,7 +59,8 @@
 
 ### 步驟 2：安裝助手腳本
 點擊下方連結直接進行一鍵安裝：
-- 👉 **[從 GitHub Raw 直接安裝](https://raw.githubusercontent.com/pthuang01/ani-gamer-ad-customizer/main/ani-gamer-ad-customizer.user.js)**
+- 👉 **[從 GitHub Raw 安裝](https://raw.githubusercontent.com/pthuang01/ani-gamer-ad-customizer/main/ani-gamer-ad-customizer.user.js)**
+- 👉 **[從 GreasyFork 安裝（建置中）]()**
 
 *(亦可手動在擴充套件中建立新腳本，並複製 `ani-gamer-ad-customizer.user.js` 的內容貼上儲存)*
 
