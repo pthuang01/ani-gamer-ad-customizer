@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         巴哈動畫瘋廣告自訂助手
-// @namespace    https://ani.gamer.com.tw/
+// @namespace    https://github.com/pthuang01/ani-gamer-ad-customizer
 // @version      1.8
 // @description  限制為巴哈自帶廣告 (跳過Google Ads)，25秒結束廣告、手動/自動結束廣告、正常/靜音播放廣告，及一個隱藏的實驗性功能
 // @author       DoReMi
@@ -10,6 +10,10 @@
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
 // @grant        unsafeWindow
+// @icon         https://ani.gamer.com.tw/favicon.ico
+// @homepageURL  https://github.com/pthuang01/ani-gamer-ad-customizer
+// @supportURL   https://github.com/pthuang01/ani-gamer-ad-customizer/issues
+// @license      MIT
 // ==/UserScript==
 
 (function () {
