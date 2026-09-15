@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🎬 巴哈動畫瘋廣告自訂助手
+# 🎬動畫瘋廣告自訂助手
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#-免責聲明-disclaimer)
-[![Version](https://img.shields.io/badge/Version-1.8-green.svg)](https://github.com/pthuang01/ani-gamer-ad-customizer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#-免責聲明-disclaimer)
+[![Version](https://img.shields.io/badge/Version-1.8-green)](https://github.com/pthuang01/ani-gamer-ad-customizer)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-安裝-960000)](https://update.greasyfork.org/scripts/595865/%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B.user.js)
-[![Platform](https://img.shields.io/badge/Platform-Tampermonkey%20%7C%20Violentmonkey-orange.svg)](#-安裝教學)
+[![Platform](https://img.shields.io/badge/Platform-Tampermonkey%20%7C%20Violentmonkey-orange)](#-安裝教學)
 
-限制為動畫瘋自帶廣告（不顯示 Google 廣告），25 秒準時結束直接切入正片！<br />
+限制為動畫瘋自帶廣告（不使用 Google 廣告），25 秒準時結束直接切入正片！<br />
 支援<b>正常 / 靜音播放</b>、<b>手動 / 自動結束廣告</b>與專屬設定視窗，享受最純粹乾淨的觀影體驗<br />
 同時內建一項進階的<b>獨家隱藏功能</b>供使用者自行探索
 
@@ -19,7 +19,7 @@
 
 ## ✨ 為什麼需要這個助手？
 
-在動畫瘋觀看動畫時，你是否經常遇到：
+在動畫瘋看動畫時，你是否經常遇到：
 - 廣告音量忽大忽小，每次開播都被突然的大音量嚇到？
 - 遇到長度不可預期的 Google Ads，甚至在倒數結束後又卡住重新載入？
 - 倒數結束了還要自己動手點擊跳過，稍微分心就多看了好幾秒？
@@ -60,8 +60,8 @@
 
 ### 步驟 2：安裝助手腳本
 點擊下方連結直接進行一鍵安裝：
-- 👉 **[從 Greasy Fork 安裝](https://greasyfork.org/zh-TW/scripts/595865-%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B)**
 - 👉 **[從 GitHub Raw 安裝](https://raw.githubusercontent.com/pthuang01/ani-gamer-ad-customizer/main/ani-gamer-ad-customizer.user.js)**
+- 👉 **[從 Greasy Fork 安裝](https://greasyfork.org/zh-TW/scripts/595865-%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B)**
 
 ### 步驟 3：開始追番！
 開啟任何 [巴哈姆特動畫瘋播放頁面](https://ani.gamer.com.tw/)，助手便會在後台自動生效運作
@@ -76,8 +76,9 @@
 1. **鍵盤快捷鍵**：按下 <kbd>Alt</kbd> + <kbd>A</kbd>
 2. **擴充套件選單**：點擊瀏覽器右上角擴充套件圖示，選擇 **「⚙️ 動畫瘋廣告設定視窗 (Alt + A)」**
 
-<p align="left">
-  <img src="images/menu_shortcut.png" alt="擴充套件選單" width="420" />
+<p align="center">
+  <img src="images/menu_shortcut.png" alt="擴充套件選單" width="420" /><br />
+  <em>▲ 油猴腳本選單中的「自定義設置」入口</em>
 </p>
 
 ---
@@ -85,15 +86,16 @@
 ### 設定選項介紹
 
 <p align="center">
-  <img src="images/settings_modal.png" alt="動畫瘋廣告自訂設定視窗" width="600" />
+  <img src="images/settings_modal.png" alt="動畫瘋廣告自訂設定視窗" width="600" /><br>
+  <em>▲ 彈出式設定面板</em>
 </p>
 
-#### 選項一：廣告播放模式 (25 秒準時結束)
+#### 廣告播放模式
 - **正常播放（預設）**：正常播放官方自帶開頭廣告，倒數 25 秒後即時跳過切入正片
 - **靜音播放**：廣告期間全程自動強制靜音，進入正片時自動恢復聲音
 - **隱藏功能**：進階實驗性功能，可供探索與切換
 
-#### 選項二：廣告跳過設定
+#### 廣告跳過設定
 - **倒數結束自動點擊跳過（預設）**：滿 25 秒跳過按鈕亮起時，自動模擬點擊切入正片，完全無須手動操作
 - **不跳過廣告**：不自動點擊，滿 25 秒後由您自行決定手動點擊跳過或看完廣告
 

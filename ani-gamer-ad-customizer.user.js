@@ -290,7 +290,7 @@
                 <div style="padding: 20px;">
                     <!-- 選項一：播放模式 -->
                     <div class="ani-modal-section">
-                        <div class="ani-modal-title">選項一：廣告播放模式 (25 秒準時結束)</div>
+                        <div class="ani-modal-title">廣告播放模式</div>
                         <div class="ani-modal-option" data-radio-id="playMode_normal">
                             <input type="radio" id="playMode_normal" name="ani_play_mode" value="normal" ${currentPlayMode === 'normal' ? 'checked' : ''}>
                             <label for="playMode_normal">
@@ -316,7 +316,7 @@
 
                     <!-- 選項二：跳過模式 -->
                     <div class="ani-modal-section" style="margin-bottom: 0;">
-                        <div class="ani-modal-title">選項二：廣告跳過設定</div>
+                        <div class="ani-modal-title">廣告跳過設定</div>
                         <div class="ani-modal-option" data-radio-id="skipMode_auto">
                             <input type="radio" id="skipMode_auto" name="ani_skip_mode" value="auto" ${currentSkipMode === 'auto' ? 'checked' : ''}>
                             <label for="skipMode_auto">
