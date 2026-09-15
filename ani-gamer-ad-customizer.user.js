@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         巴哈動畫瘋廣告自訂助手
+// @name         動畫瘋廣告自訂助手
 // @namespace    https://github.com/pthuang01/ani-gamer-ad-customizer
-// @version      1.9
-// @description  限制為巴哈自帶廣告 (跳過Google Ads)，25秒結束廣告、手動/自動結束廣告、正常/靜音播放廣告，及一個隱藏的實驗性功能
+// @version      1.9.1
+// @description  限制為動畫瘋自帶廣告 (跳過Google Ads)，25秒結束廣告、手動/自動結束廣告、正常/靜音播放廣告，及一個隱藏的實驗性功能
 // @author       DoReMi
 // @match        https://ani.gamer.com.tw/animeVideo.php?sn=*
 // @run-at       document-start
