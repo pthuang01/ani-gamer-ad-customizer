@@ -3,7 +3,7 @@
 # 🎬動畫瘋廣告自訂助手
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](#-免責聲明-disclaimer)
-[![Version](https://img.shields.io/badge/Version-1.9.3-green)](https://github.com/pthuang01/ani-gamer-ad-customizer)
+[![Version](https://img.shields.io/badge/Version-1.9.4-green)](https://github.com/pthuang01/ani-gamer-ad-customizer)
 [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-安裝-960000)](https://update.greasyfork.org/scripts/595865/%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B.user.js)
 [![Platform](https://img.shields.io/badge/Platform-Tampermonkey%20%7C%20Violentmonkey-orange)](#-安裝教學)
 
@@ -109,7 +109,9 @@
    * 不會。腳本內建音訊狀態監聽保護機制，廣告結束切入正片的瞬間，會強制解除靜音狀態，確保正片音效正常輸出
 3. **需要每次重新整理都重新設定嗎？**
    * 不需要。你的設定會自動保存在瀏覽器本地，下次打開動畫瘋依然會維持你喜好的設定
-4. **遇到問題或有功能建議，該如何回報？**
+4. **為什麼有時候還是會看到第三方廣告？**
+   * 某些情況下可能會導致阻擋失效。配合 uBlock Origin Lite 的「最佳」等級使用即可
+5. **遇到問題或有功能建議，該如何回報？**
    * 請前往  [GitHub Issues](https://github.com/pthuang01/ani-gamer-ad-customizer/issues) 或 [GreasyFork 反饋區](https://greasyfork.org/zh-TW/scripts/595865-%E5%B7%B4%E5%93%88%E5%A7%86%E7%89%B9%E5%8B%95%E7%95%AB%E7%98%8B%E5%BB%A3%E5%91%8A%E8%87%AA%E8%A8%82%E5%8A%A9%E6%89%8B/feedback) 提出回報與建議，感謝~
 
 ---
