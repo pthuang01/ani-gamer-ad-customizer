@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         動畫瘋廣告自訂助手
 // @namespace    https://github.com/pthuang01/ani-gamer-ad-customizer
-// @version      1.9.2
+// @version      1.9.3
 // @description  限制為動畫瘋自帶廣告 (跳過Google Ads)，25秒結束廣告、手動/自動結束廣告、正常/靜音播放廣告，及一個隱藏的實驗性功能
 // @author       DoReMi
 // @match        https://ani.gamer.com.tw/animeVideo.php?sn=*
@@ -741,8 +741,12 @@
     // ==========================================
     // 7. 廣告狀態檢測與靜音鎖定管理 (修復正片靜音問題)
     // ==========================================
+    let isMainVideoPlaying = false;
+
     function isAdPlaying() {
+        if (isMainVideoPlaying) return false;
         return Boolean(
+            (currentAdSession && !currentAdSession.ended) ||
             targetDocument.querySelector('.vjs-anigamer-ad-playing') ||
             targetDocument.querySelector('#adSkipButton') ||
             targetDocument.querySelector('.vast-blocker')
@@ -845,6 +849,7 @@
                 const origPlay = handlerInst.play.bind(handlerInst);
                 handlerInst.play = function (videoSn, adInfo, onComplete) {
                     console.log('[動畫瘋助手] 成功攔截 adHandler.play, sn:', videoSn, 'adInfo:', adInfo);
+                    isMainVideoPlaying = false;
                     currentAdSession = {
                         player,
                         handlerInst,
@@ -942,45 +947,53 @@
         // 【關鍵攔截三】：播放器 src 掛鉤 (免下載黑屏串流與正片解鎖)
         const origSrc = player.src.bind(player);
 
+        // 輔助函式：提取 source 的 URL 字串
+        function getSourceUrl(source) {
+            if (!source) return '';
+            if (typeof source === 'string') return source;
+            if (typeof source === 'object') {
+                if (typeof source.src === 'string') return source.src;
+                if (Array.isArray(source) && source.length > 0 && source[0] && typeof source[0].src === 'string') {
+                    return source[0].src;
+                }
+            }
+            return '';
+        }
+
+        // 正片白名單判斷邏輯 (取代原先「非廣告特徵就視為正片」的黑名單邏輯)
+        function checkIsMainVideo(source) {
+            const rawUrl = getSourceUrl(source);
+            if (!rawUrl) return false;
+
+            const lowerUrl = rawUrl.toLowerCase();
+
+            // 1. 廣告路徑安全排除 (正片絕對不會在 /ad/ 目錄下)
+            if (lowerUrl.includes('/ad/')) return false;
+
+            // 2. 正片白名單特徵：
+            //    - 必須為 HLS (.m3u8) 串流
+            //    - 且符合官方正片特徵之一：
+            //      * 包含官方防盜鏈 Token (hdnts= 或 hdntl=)
+            //      * 包含官方正片清單檔名 (playlist.m3u8 或 playlist_guest.m3u8)
+            const isHls = lowerUrl.includes('.m3u8');
+            const hasAuthToken = lowerUrl.includes('hdnts=') || lowerUrl.includes('hdntl=');
+            const isMainPlaylist = lowerUrl.includes('playlist.m3u8') || lowerUrl.includes('playlist_guest.m3u8');
+
+            return Boolean(isHls && (hasAuthToken || isMainPlaylist));
+        }
+
         player.src = function (source) {
-            const isAd = source && (
-                (typeof source === 'string' && source.includes('/ad/')) ||
-                (typeof source === 'object' && source.src && source.src.includes('/ad/'))
-            );
+            if (!source) {
+                return origSrc();
+            }
 
             const videoElem = targetDocument.getElementById('ani_video_html5_api') || targetDocument.querySelector('#ani_video video');
+            const isMain = checkIsMainVideo(source);
 
-            if (isAd) {
-                if (CONFIG.playMode === 'no-download') {
-                    console.log('[動畫瘋助手] 模式【完全不下載廣告】：阻止 Akamai 下載，啟動 1fps 心跳虛擬串流');
+            if (isMain) {
+                console.log('[動畫瘋助手] 判定為正片串流 (符合正片白名單特徵)，解除廣告防護並載入正片:', getSourceUrl(source));
+                isMainVideoPlaying = true;
 
-                    if (videoElem) {
-                        videoElem.removeAttribute('src');
-                        const oldSources = videoElem.querySelectorAll('source');
-                        oldSources.forEach(s => s.remove());
-                    }
-
-                    const stream = getOrCreateDummyStream();
-                    if (videoElem) {
-                        videoElem.srcObject = stream;
-                        videoElem.muted = true;
-                        videoElem.play().catch(() => {});
-                    }
-
-                    lastTickTime = 0;
-
-                    setTimeout(() => {
-                        player.trigger('loadedmetadata');
-                    }, 50);
-
-                    return;
-                }
-
-                if (CONFIG.playMode === 'muted') {
-                    if (videoElem) videoElem.muted = true;
-                    player.muted(true);
-                }
-            } else {
                 // 正片串流：徹底清理虛擬串流、定時器與解除靜音
                 if (dummyCanvasInterval) {
                     clearInterval(dummyCanvasInterval);
@@ -995,6 +1008,42 @@
                     videoElem.muted = false;
                 }
                 player.muted(false);
+
+                return origSrc(source);
+            }
+
+            // 【非正片串流】：一律視為廣告串流處理 (包含動畫瘋自帶廣告、Google Ads、vmsmedia 等第三方廣告)
+            console.log('[動畫瘋助手] 判定為廣告串流 (非正片白名單):', getSourceUrl(source));
+            isMainVideoPlaying = false;
+
+            if (CONFIG.playMode === 'no-download') {
+                console.log('[動畫瘋助手] 模式【完全不下載廣告】：阻止廣告下載，啟動 1fps 心跳虛擬串流');
+
+                if (videoElem) {
+                    videoElem.removeAttribute('src');
+                    const oldSources = videoElem.querySelectorAll('source');
+                    oldSources.forEach(s => s.remove());
+                }
+
+                const stream = getOrCreateDummyStream();
+                if (videoElem) {
+                    videoElem.srcObject = stream;
+                    videoElem.muted = true;
+                    videoElem.play().catch(() => {});
+                }
+
+                lastTickTime = 0;
+
+                setTimeout(() => {
+                    player.trigger('loadedmetadata');
+                }, 50);
+
+                return;
+            }
+
+            if (CONFIG.playMode === 'muted') {
+                if (videoElem) videoElem.muted = true;
+                player.muted(true);
             }
 
             return origSrc(source);
